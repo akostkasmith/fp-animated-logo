@@ -202,6 +202,17 @@
 
             });
 
+            var sphere3d = new function() {
+                let sphere = new THREE.SphereBufferGeometry(500,60,40);
+                sphere.scale(-1, 1, 1);
+
+                let texture = new THREE.TextureLoader().load('img/SAM_100_0287.jpg');
+                let material = new THREE.MeshBasicMaterial( { map: texture });
+				mesh = new THREE.Mesh( sphere, material );                
+
+                scene.add(mesh)
+            }
+
             var axisLines = new function() {
 
                 this.createLines = new function() {
