@@ -87,6 +87,7 @@
 
             var shapes = [];
             var group = new THREE.Group();
+            var mesh;
 
             var pivotPoint = new THREE.Object3D(); // Create the pivot
             
@@ -334,14 +335,18 @@
             function render() {
                 // stats.update();
 
-                shapes.forEach((item, index) => {
-                    // shapes[index].rotation.y = step += 0.005;
-                    // shapes[index].rotation.z = step += 0.0003;
-                    // shapes[index].rotation.x = step += 0.0003;
+                // shapes.forEach((item, index) => {
+                //     shapes[index].rotation.y = step += 0.005;
+                //     shapes[index].rotation.z = step += 0.0003;
+                //     shapes[index].rotation.x = step += 0.0003;
+                //     group.rotation.y += 0.001;
+                //     group.rotation.x += 0.001;
+                //     group.rotation.z += 0.001;
+                // })
+                    mesh.rotation.y -= 0.001;
                     group.rotation.y += 0.001;
                     group.rotation.x += 0.001;
                     group.rotation.z += 0.001;
-                })
 
                 orbit.update();       
 
