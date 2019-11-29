@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>FP Rotating Logo</title>
+    <script type="text/javascript" src="libs/three.js"></script>
+
+    <script type="text/javascript" src="libs/stats.js"></script>
+    <script type="text/javascript" src="libs/dat.gui.js"></script>
+    <script type="text/javascript" src="libs/d3-threeD.js"></script>
+    <script type="text/javascript" src="libs/OrbitControls.js"></script>
+    <script type="text/javascript" src="libs/postprocessing.min.js"></script>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+            background-color: #333;
+        }
+        /* canvas { opacity: 0.1;} */
+    </style>
+</head>
+
+<body>
+
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
+
+    <div id="batman" style="display:none">
+        <svg version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+            width="1152px" height="1152px" xml:space="preserve">
+            <g>
+            <path fill="#80A3D5" style="fill:rgb(128, 163, 213)" id="path1" points="M214,285 214,366.664 137,411.625 137,285 " />
+            </g>
+            <g>
+            <path fill="#E57367" style="fill:rgb(128, 163, 213)" id="path2" points="M178.042,88.018 260.314,169 318.119,169 364.055,88.091 " />
+            </g>
+            <g>
+            <path fill="#99CC5C" style="fill:rgb(128, 163, 213)" id="path3" points="M189.735,207.615 154.353,207.615 136.603,225.365 136.603,285.363 266.396,285.363" />
+            </g>
+            <g>
+            <path fill="#FBCC43" style="fill:rgb(128, 163, 213)" id="path4" points="M178.035,87.939 137,129.251 137,154.138 266.404,285.363 309,241.845 309,216.823" />
+            </g>
+        </svg>
+    </div>
+
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
+        var orbit;
+
+        // once everything is loaded, we run our Three.js stuff.
+        function init() {
+
+            // var stats = initStats();
+
+            // create a scene, that will hold all our elements such as objects, cameras and lights.
+            var scene = new THREE.Scene();
+
+            // create a camera, which defines where we're looking at.
+            var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+            // create a render and set the size
+            var webGLRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true});
+            webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+            webGLRenderer.setSize(window.innerWidth, window.innerHeight);
+            webGLRenderer.setClearColor (0x000000, 0);
+            webGLRenderer.shadowMapEnabled = true;
+
+            var shapes = [];
+            var group = new THREE.Group();
+
+            var pivotPoint = new THREE.Object3D(); // Create the pivot
+            
+
+            let options = {
+                amount: 5,
+                bevelThickness: 1,
+                bevelSize: 2.5,
+                bevelSegments: 7,
+                bevelEnabled: true,
+                curveSegments: 12,
+                steps: 1
+            };
+            let geo1 = new THREE.ExtrudeGeometry(drawShape('#path1'), options);
+            let geo2 = new THREE.ExtrudeGeometry(drawShape('#path2'), options);
+            let geo3 = new THREE.ExtrudeGeometry(drawShape('#path3'), options);
+            let geo4 = new THREE.ExtrudeGeometry(drawShape('#path4'), options);
+
+            // geo1.vertices[0].set(0,0,0);
+            // geo1.verticesNeedUpdate = true;
+
+            geo1.applyMatrix( new THREE.Matrix4().makeTranslation(150, -150, -1) );
+            geo2.applyMatrix( new THREE.Matrix4().makeTranslation(150, -150, -1) );
+            geo3.applyMatrix( new THREE.Matrix4().makeTranslation(150, -150, -1) );
+            geo4.applyMatrix( new THREE.Matrix4().makeTranslation(150, -150, -1) );
+
+            shapes.push(createMesh(geo1,'#80A3D5'));
+            shapes.push(createMesh(geo2,'#E57367')); 
+            shapes.push(createMesh(geo3,'#99CC5C'));
+            shapes.push(createMesh(geo4,'#FBCC43'));
+            // add the sphere to the scene
+
+            shapes.forEach((item, index) => {
+                // scene.add(item);
+                group.add(item)
+            })
+            
+            pivotPoint.add(group);
+            pivotPoint.rotation.y += 1.5;
+            
+
+            // position and point the camera to the center of the scene
+            camera.position.x = -80;
+            camera.position.y = 80;
+            camera.position.z = 80;
+            camera.lookAt(new THREE.Vector3(60, -60, 0));
+
+            // var spotLight = new THREE.DirectionalLight(0xffffff);
+            // spotLight.position = new THREE.Vector3(70, 170, 70);
+            // spotLight.intensity = 1;
+            // spotLight.target = shapes[1];
+            // scene.add(spotLight);
+
+            let light1 = new THREE.PointLight(0xffffff,1);
+            light1.position.set(0,300,500);
+            scene.add(light1);
+
+            let light2 = new THREE.PointLight(0xffffff,1);
+            light2.position.set(500,100,0);
+            scene.add(light2);
+
+              let light3 = new THREE.PointLight(0xffffff,1);
+            light3.position.set(0,100,-500);
+            scene.add(light3);
+
+            let light4 = new THREE.PointLight(0xffffff,1);
+            light4.position.set(-500,300,0);
+            scene.add(light4);
+
+
+            // add the output of the renderer to the html element
+            document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
+
+            orbit = new THREE.OrbitControls(camera, webGLRenderer.domElement);
+
+            // call the render function
+            var yrotate = 0;
+            var xrotate = 0;
+            var zrotate = 0;
+            
+            var xpos = 0;
+            var ypos = 0;
+            var zpos = 0;
+
+            document.body.addEventListener('keydown',function(e) {
+                // console.log(e.keyCode);
+                switch(e.keyCode) {
+                    case 37:
+                        group.rotation.y = yrotate += 0.05;
+                    break;
+                    case 39:
+                        group.rotation.y = yrotate -= 0.05;
+                    break;
+                    case 38: // up
+                        group.rotation.z = zrotate += 0.05;
+                    break;
+                    case 40: // down
+                        group.rotation.z = zrotate -= 0.05;
+                    break;
+                    case 87: // w 
+                        group.position.x = xpos -= 1;                        
+                    break;
+                    case 83: // s
+                        group.position.x = xpos += 1;
+                    break;
+                    case 65: // a
+                        group.position.y = ypos -= 1;
+                    break; 
+                    case 68: // d
+                        group.position.y = ypos += 1;
+                    break;
+                }                
+
+            });
+
+            var axisLines = new function() {
+
+                this.createLines = new function() {
+                    
+                    var xMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
+                    var yMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
+                    var zMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+                    
+                    let xgeometry = new THREE.Geometry();
+                    xgeometry.vertices.push(new THREE.Vector3(-100,0,0));
+                    xgeometry.vertices.push(new THREE.Vector3(100,0,0));
+                    
+                    let ygeometry = new THREE.Geometry();
+                    ygeometry.vertices.push(new THREE.Vector3(0,-100,0));
+                    ygeometry.vertices.push(new THREE.Vector3(0,100,0));
+                    
+                    let zgeometry = new THREE.Geometry();
+                    zgeometry.vertices.push(new THREE.Vector3(0,0,-100));
+                    zgeometry.vertices.push(new THREE.Vector3(0,0,100));
+
+                    let xLine = new THREE.Line(xgeometry, xMaterial);
+                    let yLine = new THREE.Line(ygeometry, yMaterial);
+                    let zLine = new THREE.Line(zgeometry, zMaterial);
+                    
+                    scene.add(xLine);
+                    scene.add(yLine);
+                    scene.add(zLine);
+                }
+
+            }
+
+            // setup the control gui
+            var controls = new function () {
+
+                this.amount = 2;
+                this.bevelThickness = 2;
+                this.bevelSize = 0.5;
+                this.bevelEnabled = true;
+                this.bevelSegments = 3;
+                this.bevelEnabled = true;
+                this.curveSegments = 12;
+                this.steps = 1;
+
+                this.asGeom = function () {
+                    // remove the old plane
+                    scene.remove(group);
+                    // shapes.forEach((item, index) => {
+                    //     scene.remove(item);
+                    // })
+                    
+                    // create a new one
+
+                    var options = {
+                        amount: controls.amount,
+                        bevelThickness: controls.bevelThickness,
+                        bevelSize: controls.bevelSize,
+                        bevelSegments: controls.bevelSegments,
+                        bevelEnabled: controls.bevelEnabled,
+                        curveSegments: controls.curveSegments,
+                        steps: controls.steps
+                    };
+
+                    // shapes[1] = createMesh(new THREE.ExtrudeGeometry(drawShape('#path1'), options),'#80A3D5');
+                    // shapes[2] = createMesh(new THREE.ExtrudeGeometry(drawShape('#path2'), options),'#E57367');
+                    // shapes[3] = createMesh(new THREE.ExtrudeGeometry(drawShape('#path3'), options),'#99CC5C');
+                    // shapes[4] = createMesh(new THREE.ExtrudeGeometry(drawShape('#path4'), options),'#FBCC43');
+
+                    // add it to the scene.
+                    scene.add(group);
+
+                };
+
+            };
+
+            // var gui = new dat.GUI();
+            // gui.add(controls, 'amount', 0, 20).onChange(controls.asGeom);
+            // gui.add(controls, 'bevelThickness', 0, 10).onChange(controls.asGeom);
+            // gui.add(controls, 'bevelSize', 0, 10).onChange(controls.asGeom);
+            // gui.add(controls, 'bevelSegments', 0, 30).step(1).onChange(controls.asGeom);
+            // gui.add(controls, 'bevelEnabled').onChange(controls.asGeom);
+            // gui.add(controls, 'curveSegments', 1, 30).step(1).onChange(controls.asGeom);
+            // gui.add(controls, 'steps', 1, 5).step(1).onChange(controls.asGeom);
+
+            controls.asGeom();
+            render();
+
+            function drawShape(id) {
+                
+                let svgString = document.querySelector(id).getAttribute("points");
+                var shape = transformSVGPathExposed(svgString);
+
+                // return the shape
+                return shape;
+            }
+
+            function createMesh(geom, color) {
+
+                color = parseInt(color.replace(/^#/,''), 16);
+                geom.applyMatrix(new THREE.Matrix4().makeTranslation(-390, -74, 0));
+
+
+                // assign two materials
+                var meshMaterial = new THREE.MeshPhongMaterial({
+                    //color: 0x333333,
+                    color: color,
+                    shininess: 100,
+                    metal: true
+                });
+                var mesh = new THREE.Mesh(geom, meshMaterial);
+                mesh.scale.x = 0.1;
+                mesh.scale.y = 0.1;
+
+                 mesh.rotation.z = Math.PI;
+                 mesh.rotation.x = -1.1;
+                return mesh;
+            }
+
+
+            function render() {
+                // stats.update();
+
+                shapes.forEach((item, index) => {
+                    // shapes[index].rotation.y = step += 0.005;
+                    // shapes[index].rotation.z = step += 0.0003;
+                    // shapes[index].rotation.x = step += 0.0003;
+                })
+
+                orbit.update();       
+
+
+                // render using requestAnimationFrame
+                requestAnimationFrame(render);
+                webGLRenderer.render(scene, camera);
+            }
+
+            function initStats() {
+
+                var stats = new Stats();
+                stats.setMode(0); // 0: fps, 1: ms
+
+                // Align top-left
+                stats.domElement.style.position = 'absolute';
+                stats.domElement.style.left = '0px';
+                stats.domElement.style.top = '0px';
+
+                document.getElementById("Stats-output").appendChild(stats.domElement);
+
+                return stats;
+            }
+        }
+        window.onload = init;
+    </script>
+</body>
+
+</html>
